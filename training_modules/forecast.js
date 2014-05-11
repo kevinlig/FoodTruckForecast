@@ -15,43 +15,6 @@ for (var i = 0; i < weatherQualityKeys.length; i++) {
 }
 
 
-var totalForecast = {};
-
-var forecastTruck = function(truckId, date, holiday, precip, temperature, weatherQuality, response) {
-	
-	// get truck forecasting model
-	schemas.forecastModel.findOne({truckId: truckId},function(err, doc) {
-		if (err !== undefined & doc === undefined) {
-			response.send("no results");
-			return;
-		}
-
-		var model = doc.forecastJSON;
-		var network = new brain.NeuralNetwork();
-		network.fromJSON(JSON.parse(model));
-
-		// parse the date
-		var dateObj = moment(date);
-
-
-		var month = dateObj.format("M");
-		var weekday = dateObj.format("d");
-		var yearweek = dateObj.format("w");
-		var holiday = 0;
-
-		var inputParams = {
-			weekday: weekday,
-			weatherQuality: weatherQuality
-		};
-		console.log(inputParams);
-
-		var output = network.run(inputParams);
-
-		response.json(output);
-
-	});
-
-};
 
 var forecastForDay = function(date, weather) {
 	var weatherQuality = weatherQualityObj[weather.icon];
@@ -62,6 +25,19 @@ var forecastForDay = function(date, weather) {
 	var weekday = date.format("d");
 
 	var dayForecast = [];
+
+	if (holidayCalculator.checkHoliday(date) == 1) {
+		// OPM holiday, don't do any forecasting
+		// save predictions to DB
+		var completedForecast = new schemas.predictionModel({
+			weekday: weekday,
+			holiday: 1,
+			detailJSON: "[]",
+			forecastDate: moment().unix()
+		});
+		completedForecast.save();
+	}
+	return;
 
 	schemas.forecastModel.find({}, function(err, docs) {
 		for (var i = 0; i < docs.length; i++) {
@@ -95,6 +71,7 @@ var forecastForDay = function(date, weather) {
 		// save predictions to DB
 		var completedForecast = new schemas.predictionModel({
 			weekday: weekday,
+			holiday: 0,
 			detailJSON: JSON.stringify(dayForecast),
 			forecastDate: moment().unix()
 		});
@@ -162,6 +139,4 @@ var generateForecast = function(forecastType) {
 
 };
 
-
-module.exports.forecastTruck = forecastTruck;
 module.exports.generateForecast = generateForecast;

@@ -13,6 +13,7 @@ var forecastModel = mongoose.model('ForecastModel', forecastModelSchema);
 
 var predictionSchema = mongoose.Schema({
 	weekday: Number,
+	holiday: Number,
 	detailJSON: String,
 	forecastDate: Number
 }, {collection: 'forecastdata'});
