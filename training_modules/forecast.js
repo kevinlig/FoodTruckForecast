@@ -37,48 +37,48 @@ var forecastForDay = function(date, weather) {
 		});
 		completedForecast.save();
 	}
-	return;
+	else {
 
-	schemas.forecastModel.find({}, function(err, docs) {
-		for (var i = 0; i < docs.length; i++) {
-			// forecast!
-			var model = docs[i].forecastJSON;
-			var network = new brain.NeuralNetwork();
-			network.fromJSON(JSON.parse(model));
+		schemas.forecastModel.find({}, function(err, docs) {
+			for (var i = 0; i < docs.length; i++) {
+				// forecast!
+				var model = docs[i].forecastJSON;
+				var network = new brain.NeuralNetwork();
+				network.fromJSON(JSON.parse(model));
 
-			var inputParams = {
-				weekday: weekday,
-				weatherQuality: weatherQuality
-			};
+				var inputParams = {
+					weekday: weekday,
+					weatherQuality: weatherQuality
+				};
 
-			var output = network.run(inputParams);
+				var output = network.run(inputParams);
 
-			if (output.present < 0.2) {
-				// food truck will not be present
-				continue;
+				if (output.present < 0.2) {
+					// food truck will not be present
+					continue;
+				}
+
+				var wrappedOutput = {
+					truckId: docs[i].truckId,
+					truckName: docs[i].truckName,
+					errorRate: docs[i].errorRate,
+					forecast: output.present
+				};
+
+				dayForecast.push(wrappedOutput);
 			}
 
-			var wrappedOutput = {
-				truckId: docs[i].truckId,
-				truckName: docs[i].truckName,
-				errorRate: docs[i].errorRate,
-				forecast: output.present
-			};
+			// save predictions to DB
+			var completedForecast = new schemas.predictionModel({
+				weekday: weekday,
+				holiday: 0,
+				detailJSON: JSON.stringify(dayForecast),
+				forecastDate: moment().unix()
+			});
+			completedForecast.save();
 
-			dayForecast.push(wrappedOutput);
-		}
-
-		// save predictions to DB
-		var completedForecast = new schemas.predictionModel({
-			weekday: weekday,
-			holiday: 0,
-			detailJSON: JSON.stringify(dayForecast),
-			forecastDate: moment().unix()
 		});
-		completedForecast.save();
-
-	});
-
+	}
 };
 
 var generateForecast = function(forecastType) {
