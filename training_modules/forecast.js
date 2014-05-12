@@ -181,11 +181,10 @@ var generateForecastPage = function(res) {
 		var weekday = startingWeekday;
 		for (var i = 0; i < 3; i++) {
 
-			if (weekday != 0 && weekday != 6 && ) {
-				if (forecastData['day' + weekday] != undefined) {
-					forecastData['day'+ weekday].stringDay = stringDays[weekday];
-					displayOrder.push(forecastData['day' + weekday]);
-				}
+			if (weekday != 0 && weekday != 6 && forecastData['day' + weekday] != undefined) {
+				forecastData['day'+ weekday].stringDay = stringDays[weekday];
+				displayOrder.push(forecastData['day' + weekday]);
+			
 			}
 			else {
 				displayOrder.push({
