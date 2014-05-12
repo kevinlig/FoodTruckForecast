@@ -3,7 +3,6 @@ var router = express.Router();
 
 var forecast = require('../training_modules/forecast');
 var request = require('request-promise');
-var moment = require('moment');
 var forecast = require('../training_modules/forecast');
 
 /* GET home page. */

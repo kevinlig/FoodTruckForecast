@@ -2,7 +2,7 @@ var brain = require('brain');
 var mongoose = require('mongoose');
 var db = require('../db_modules/db');
 var schemas = require('../db_modules/schemas');
-var moment = require('moment');
+var moment = require('moment-timezone');
 var holidayCalculator = require('./opmCalc');
 var request = require('request-promise');
 
@@ -39,7 +39,7 @@ var retrieveForecastGraphData = function(res) {
 			forecastData['day' + doc.weekday] = forecastDay;
 		}
 
-		var startingWeekday = moment.unix(calculationDate).format("d");
+		var startingWeekday = moment.unix(calculationDate).tz('America/New_York').format("d");
 		if (moment.unix(calculationDate).format("H") > 12) {
 			// this is a PM forecasting run so start with the following day
 			startingWeekday = parseInt(startingWeekday) + 1;
@@ -200,7 +200,7 @@ var generateForecastPage = function(res) {
 			}
 		}
 
-		var generatedDate = moment.unix(calculationDate).format("dddd, MMMM D, YYYY") + " at " + moment.unix(calculationDate).format("h:mm A");
+		var generatedDate = moment.unix(calculationDate).format("dddd, MMMM D, YYYY") + " at " + moment.unix(calculationDate).tz('America/New_York').format("h:mm A");
 		res.render('index',{predictionArray: displayOrder,generatedDate: generatedDate});
 
 
@@ -274,7 +274,7 @@ var forecastForDay = function(date, weather) {
 
 var generateForecast = function(forecastType) {
 	// generate forecast for the next 5 days or so
-	var today = moment();
+	var today = moment().tz('America/New_York');
 
 	if (forecastType == "pm") {
 		// afternoon forecasts start with the next day

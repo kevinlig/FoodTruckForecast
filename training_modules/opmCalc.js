@@ -1,4 +1,4 @@
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 // round a weekend holiday to the nearest OPM observed date
 // takes a moment date obj as argument
