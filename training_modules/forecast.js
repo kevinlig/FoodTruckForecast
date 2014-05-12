@@ -312,7 +312,6 @@ var generateForecast = function(forecastType) {
 
 			var stringDate = candidateDate.tz("America/New_York").format("YYYY-M-D");
 			var candidateTime = moment.tz(stringDate + " 12:00:00 PM","America/New_York").unix();
-			console.log(stringDate + " " + candidateTime);
 
 			request(forecastUrl + "," + candidateTime)
 			.then(function(data) {
