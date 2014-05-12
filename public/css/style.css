@@ -8449,7 +8449,6 @@ hr {
 /* Copyright Wrap */
 /* line 151, ../scss/vendor/_theme.scss */
 #c {
-  background: #222222;
   padding-top: 15px;
 }
 
@@ -8537,18 +8536,19 @@ a.navbar-brand {
 
 /* line 71, ../scss/partials/_main.scss */
 #c .container {
+  border-top: 1px solid #cfcfcf;
   display: table;
   width: 100%;
-  color: #ffffff;
-  padding-bottom: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   font-size: 12px;
 }
-/* line 78, ../scss/partials/_main.scss */
+/* line 79, ../scss/partials/_main.scss */
 #c .date {
   display: table-cell;
   width: 50%;
 }
-/* line 82, ../scss/partials/_main.scss */
+/* line 83, ../scss/partials/_main.scss */
 #c .credit {
   display: table-cell;
   width: 50%;

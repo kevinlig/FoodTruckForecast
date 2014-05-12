@@ -69,10 +69,11 @@ figure#chart {
 
 #c {
 	.container {
+		border-top: 1px solid #cfcfcf;
 		display: table;
 		width:100%;
-		color: #ffffff;
-		padding-bottom: 15px;
+		padding-top: 10px;
+		padding-bottom: 10px;
 		font-size: 12px;
 	}
 	.date {
