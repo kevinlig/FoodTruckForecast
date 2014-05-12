@@ -213,7 +213,7 @@ var forecastForDay = function(date, weather) {
 		weatherQuality = 1;
 	}
 
-	var weekday = date.format("d");
+	var weekday = date.tz("America/New_York").format("d");
 
 	var dayForecast = [];
 
@@ -312,6 +312,7 @@ var generateForecast = function(forecastType) {
 
 			var stringDate = candidateDate.tz("America/New_York").format("YYYY-M-D");
 			var candidateTime = moment(stringDate + " 12:00:00 PM").tz("America/New_York").unix();
+			console.log(candidateTime);
 
 			request(forecastUrl + "," + candidateTime)
 			.then(function(data) {
