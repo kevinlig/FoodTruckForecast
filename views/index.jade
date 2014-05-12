@@ -1,5 +1,75 @@
-extends layout
+doctype html
+html
+	head
+		meta(charset='utf-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		title Food Truck Forecast
+		link(rel='stylesheet', href='/css/style.css')
+		link(rel='stylesheet', href='/css/nv.d3.min.css')
+		script(type='text/javascript', src='js/jquery.min.js')
+		script(type='text/javascript', src='js/bootstrap.js')
+		script(type='text/javascript', src='js/d3.min.js')			
+		script(type='text/javascript', src='js/nv.d3.min.js')
+		script(type='text/javascript', src='js/forecastchart.js')
+	body
+		#navigation.navbar.navbar-default.navbar-fixed-top
+			.container
+				.navbar-header
+					a.navbar-brand
+						b Food Truck Forecast
 
-block content
-  h1= title
-  p Welcome to #{title}
+		#forecastGraph
+			.container
+				.row.centered
+					.col-lg-12
+						figure#chart(style='height: 300px')
+							svg
+		#detailWrap.container
+			.row
+				.col-lg-12
+					each predictionObj in predictionArray
+						h4= predictionObj.stringDay
+						if (predictionObj.weekend == 1)
+							p Food truck forecasts are not generated for the weekend.
+						else if (predictionObj.holiday == 1)
+							p Food truck forecasts are not generated for federal government holidays.
+						else
+							if (predictionObj.categories > 0)
+								.predictionWrapper
+									if (predictionObj.highlyLikely.length > 0)
+										.truckListBlock
+											p.listHead Highly Likely
+											ul
+												each predictionItem in predictionObj.highlyLikely
+													li
+														span.hoverTip(data-toggle="popover", data-placement="right",data-content="<b>Forecast Quality:</b> <span class=\"forecastQuality-" + predictionItem.qualityClass + "\">" + predictionItem.qualityString + "</span>")
+															=predictionItem.truckName
+
+									if (predictionObj.likely.length > 0)
+										.truckListBlock
+											p.listHead Likely
+											ul
+												each predictionItem in predictionObj.likely
+													li
+														span.hoverTip(data-toggle="popover", data-placement="right",data-content="<b>Forecast Quality:</b> <span class=\"forecastQuality-" + predictionItem.qualityClass + "\">" + predictionItem.qualityString + "</span>")
+															=predictionItem.truckName
+									if (predictionObj.possibly.length > 0)
+										.truckListBlock
+											p.listHead Possibly
+											ul
+												each predictionItem in predictionObj.possibly
+													li
+														span.hoverTip(data-toggle="popover", data-placement="right",data-content="<b>Forecast Quality:</b> <span class=\"forecastQuality-" + predictionItem.qualityClass + "\">" + predictionItem.qualityString + "</span>")
+															=predictionItem.truckName
+									if (predictionObj.categories < 3)
+										.truckListBlock
+									if (predictionObj.categories < 2)
+										.truckListBlock
+							else
+								p No food trucks are predicted to be present on this day.
+		#c
+			.container
+				.date
+					b Forecast run: 
+					span=generatedDate
+				.credit &copy; 2014 Kevin Li

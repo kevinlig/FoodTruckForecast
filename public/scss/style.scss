@@ -1,8 +1,6 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
+@import url(http://fonts.googleapis.com/css?family=Oxygen:400,700,300);
+@import url(http://fonts.googleapis.com/css?family=Lato:900);
 
-a {
-  color: #00B7FF;
-}
+@import "vendor/bootstrap";
+@import "vendor/theme";
+@import "partials/main";

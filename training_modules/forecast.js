@@ -15,6 +15,197 @@ for (var i = 0; i < weatherQualityKeys.length; i++) {
 }
 
 
+var stringDays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+var retrieveForecastGraphData = function(res) {
+	// get all forecast data
+	var forecastData = {};
+	var displayOrder = [];
+	schemas.predictionModel.find({}, function(err, docs) {
+		var calculationDate;
+
+		for (var i = 0; i < docs.length; i++) {
+			var doc = docs[i];
+
+			var forecastDay = {
+				weekend: 0,
+				weekday: doc.weekday,
+				detail: JSON.parse(doc.detailJSON),
+				holiday: doc.holiday
+			};
+
+			calculationDate = doc.forecastDate;
+			
+			forecastData['day' + doc.weekday] = forecastDay;
+		}
+
+		var startingWeekday = moment.unix(calculationDate).format("d");
+		if (moment.unix(calculationDate).format("H") > 12) {
+			// this is a PM forecasting run so start with the following day
+			startingWeekday = parseInt(startingWeekday) + 1;
+			if (startingWeekday > 6) {
+				startingWeekday = 0;
+			}
+		}
+
+		var weekday = startingWeekday;
+		for (var i = 0; i < 5; i++) {
+
+			if (weekday != 0 && weekday != 6) {
+				displayOrder.push(forecastData['day' + weekday]);
+			}
+			else {
+				displayOrder.push({
+					weekend: 1,
+					weekday: weekday
+				});
+			}
+
+			weekday++;
+			if (weekday > 6) {
+				weekday = 0;
+			}
+		}
+
+		
+
+		var valueArray = [];
+		for (var i = 0; i < displayOrder.length; i++) {
+			var itemObj = {
+				label: stringDays[displayOrder[i].weekday]
+			};
+
+			if (displayOrder[i].weekend == 1 || displayOrder[i].holiday == 1) {
+				itemObj.value = 0;
+			}
+			else {
+				itemObj.value = displayOrder[i].detail.length;
+			}
+
+			valueArray.push(itemObj);
+		}
+
+		res.json([{key: "Food Trucks", values: valueArray}]);
+
+
+	});
+};
+
+var generateForecastPage = function(res) {
+	// get all forecast data
+	var forecastData = {};
+	var displayOrder = [];
+	schemas.predictionModel.find({}, function(err, docs) {
+		var calculationDate;
+
+		for (var i = 0; i < docs.length; i++) {
+			var doc = docs[i];
+
+			var detail = JSON.parse(doc.detailJSON);
+			var highlyLikely = [];
+			var likely = [];
+			var possibly = [];
+
+			var categories = 0;
+
+			for (var j = 0; j < detail.length; j++) {
+				var predictionItem = detail[j];
+
+				var qualityClass = 0;
+				var qualityString = "Poor";
+
+				if (predictionItem.errorRate <= 0.05) {
+					qualityClass = 10;
+					qualityString = "Excellent";
+				}
+				else if (predictionItem.errorRate <= 0.1) {
+					qualityClass = 5;
+					qualityString = "Good";
+				}
+				else if (predictionItem.errorRate <= 0.15) {
+					qualityClass = 2;
+					qualityString = "Fair";
+				}
+
+				predictionItem.qualityClass = qualityClass;
+				predictionItem.qualityString = qualityString;
+
+
+				if (predictionItem.forecast >= 0.6) {
+					highlyLikely.push(predictionItem);
+
+					if (highlyLikely.length == 1) {
+						categories++;
+					}
+				}
+				else if (predictionItem.forecast >= 0.4) {
+					likely.push(predictionItem);
+
+					if (likely.length == 1) {
+						categories++;
+					}
+				}
+				else {
+					possibly.push(predictionItem);
+
+					if (possibly.length == 1) {
+						categories++;
+					}
+				}
+			}
+
+			var forecastDay = {
+				weekend: 0,
+				weekday: doc.weekday,
+				highlyLikely: highlyLikely,
+				likely: likely,
+				possibly: possibly,
+				categories: categories,
+				holiday: doc.holiday
+			};
+
+			calculationDate = doc.forecastDate;
+			
+			forecastData['day' + doc.weekday] = forecastDay;
+		}
+
+		var startingWeekday = moment.unix(calculationDate).format("d");
+		if (moment.unix(calculationDate).format("H") > 12) {
+			// this is a PM forecasting run so start with the following day
+			startingWeekday = parseInt(startingWeekday) + 1;
+			if (startingWeekday > 6) {
+				startingWeekday = 0;
+			}
+		}
+
+		var weekday = startingWeekday;
+		for (var i = 0; i < 3; i++) {
+
+			if (weekday != 0 && weekday != 6) {
+				forecastData['day'+ weekday].stringDay = stringDays[weekday];
+				displayOrder.push(forecastData['day' + weekday]);
+			}
+			else {
+				displayOrder.push({
+					weekend: 1,
+					holiday: 0,
+					weekday: weekday,
+					stringDay: stringDays[weekday]
+				});
+			}
+
+			weekday++;
+			if (weekday > 6) {
+				weekday = 0;
+			}
+		}
+
+		var generatedDate = moment.unix(calculationDate).format("dddd, MMMM D, YYYY") + " at " + moment.unix(calculationDate).format("h:mm A");
+		res.render('index',{predictionArray: displayOrder,generatedDate: generatedDate});
+
+
+	});
+};
 
 var forecastForDay = function(date, weather) {
 	var weatherQuality = weatherQualityObj[weather.icon];
@@ -140,3 +331,6 @@ var generateForecast = function(forecastType) {
 };
 
 module.exports.generateForecast = generateForecast;
+module.exports.displayForecastGraph = retrieveForecastGraphData;
+module.exports.displayForecastText = generateForecastPage;
+
