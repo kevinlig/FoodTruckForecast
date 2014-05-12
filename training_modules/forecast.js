@@ -51,7 +51,7 @@ var retrieveForecastGraphData = function(res) {
 		var weekday = startingWeekday;
 		for (var i = 0; i < 5; i++) {
 
-			if (weekday != 0 && weekday != 6) {
+			if (weekday != 0 && weekday != 6 && forecastData['day' + weekday] != undefined) {
 				displayOrder.push(forecastData['day' + weekday]);
 			}
 			else {
