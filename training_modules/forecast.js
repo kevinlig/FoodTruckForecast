@@ -40,7 +40,7 @@ var retrieveForecastGraphData = function(res) {
 		}
 
 		var startingWeekday = moment.unix(calculationDate).tz('America/New_York').format("d");
-		if (moment.unix(calculationDate).format("H") > 12) {
+		if (moment.unix(calculationDate).tz("America/New_York").format("H") > 12) {
 			// this is a PM forecasting run so start with the following day
 			startingWeekday = parseInt(startingWeekday) + 1;
 			if (startingWeekday > 6) {
@@ -170,7 +170,7 @@ var generateForecastPage = function(res) {
 		}
 
 		var startingWeekday = moment.unix(calculationDate).format("d");
-		if (moment.unix(calculationDate).format("H") > 12) {
+		if (moment.unix(calculationDate).tz("America/New_York").format("H") > 12) {
 			// this is a PM forecasting run so start with the following day
 			startingWeekday = parseInt(startingWeekday) + 1;
 			if (startingWeekday > 6) {
