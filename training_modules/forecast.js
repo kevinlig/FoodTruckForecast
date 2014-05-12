@@ -290,42 +290,45 @@ var generateForecast = function(forecastType) {
 	else {
 		forecastUrl = process.env.FORECAST_URL;
 	}
-	request(forecastUrl)
-	.then(function(data) {
-		// weather data returned, parse it
-		var dataObj = JSON.parse(data);
 
-		// first delete all old predictions from DB
-		schemas.predictionModel.find({}, function(err, docs) {
-			for (var j = 0; j < docs.length; j++) {
-				docs[j].remove();
-			}
+	
+		
+	// first delete all old predictions from DB
+	schemas.predictionModel.find({}, function(err, docs) {
+		for (var j = 0; j < docs.length; j++) {
+			docs[j].remove();
+		}
 
-			// now generate predictions for each day
-			for (var i = 0; i < 5; i++) {
-				var candidateDate = today;
-
-				var weatherIndex = i;
-				if (forecastType == "pm") {
-					weatherIndex++;
-				}
-
-				if (candidateDate.format("d") != 0 && candidateDate.format("d") != 6) {
-					// not a week, start forecast
-					var weather = dataObj.daily.data[weatherIndex];
-					// console.log(moment.unix(weather.time).format("M/D"));
-					forecastForDay(candidateDate, weather);
-				}
-
-
+		var candidateDate = today;
+		for (var i = 0; i < 5; i++) {
+			
+			if (i > 0) {
 				candidateDate.add('d',1);
 			}
+			if (candidateDate.format("d") == 0 || candidateDate.format("d") == 6) {
+				// not a weekday, don't forecast
+				continue;
+			}
 
-		});		
-	})
-	.catch(function() {
-		// something went wrong
-		return;
+			var stringDate = candidateDate.tz("America/New_York").format("YYYY-M-D");
+			var candidateTime = moment(stringDate + " 12:00:00 PM").tz("America/New_York").unix();
+
+			request(forecastUrl + "," + candidateTime)
+			.then(function(data) {
+				// weather data returned, parse it
+				var dataObj = JSON.parse(data);
+				var weather = dataObj.currently;
+
+				var instanceDate = moment.unix(dataObj.currently.time);
+
+				// now generate predictions for the day
+				forecastForDay(instanceDate, weather);
+			})
+			.catch(function() {
+				// something went wrong
+				return;
+			});
+		}	
 	});
 
 };
