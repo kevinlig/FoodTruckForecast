@@ -291,12 +291,14 @@ var generateForecast = function(forecastType) {
 		forecastUrl = process.env.FORECAST_URL;
 	}
 
+	var oldForecasts = [];
 	
 		
 	// first delete all old predictions from DB
 	schemas.predictionModel.find({}, function(err, docs) {
 		for (var j = 0; j < docs.length; j++) {
-			docs[j].remove();
+			// docs[j].remove();
+			oldForecasts.push(docs[j]);
 		}
 
 		var candidateDate = today;
@@ -328,7 +330,11 @@ var generateForecast = function(forecastType) {
 				// something went wrong
 				return;
 			});
-		}	
+		}
+
+		for (var i = 0; i < oldForecasts.length; i++) {
+			oldForecasts[i].remove();
+		}
 	});
 
 };
